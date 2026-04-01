@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>香香面包岛记录</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --pink:#F9C6D0;--pink-d:#E8899A;--pink-dd:#C45B72;--pink-bg:#FEF0F3;
+  --blue:#B8D8F8;--blue-d:#6AAAE8;--blue-dd:#2C7ABE;--blue-bg:#EDF5FD;
+  --cream-dd:#D4A872;--text:#3D2B35;--text-m:#7A5A65;--text-l:#B89AA5;
+  --green-bg:#EDFAF3;--green-d:#2D8A5E;
+  --red-bg:#FEF0F0;--red-d:#C04545;
+  --shadow:0 4px 20px rgba(200,120,140,0.12);--r:16px;--r-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#FEF6F8;color:var(--text);font-family:'Nunito','Noto Sans SC',sans-serif;min-height:100vh;}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;z-index:999;background:linear-gradient(135deg,#F9C6D0,#C8DEFA);display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{background:white;border-radius:24px;border:2px solid var(--pink-d);padding:32px 28px;width:100%;max-width:340px;box-shadow:0 12px 48px rgba(200,100,130,0.18);text-align:center;}
+.login-box .licon{font-size:52px;margin-bottom:6px;}
+.login-box h2{font-size:22px;font-weight:800;color:var(--pink-dd);margin-bottom:4px;}
+.login-box p{font-size:12px;color:var(--text-l);margin-bottom:20px;}
+.login-box input{width:100%;border:1.5px solid var(--pink);border-radius:10px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:600;color:var(--text);outline:none;text-align:center;letter-spacing:5px;margin-bottom:10px;transition:border .15s;}
+.login-box input:focus{border-color:var(--pink-dd);}
+.login-box .err{font-size:12px;color:var(--red-d);min-height:18px;margin-bottom:8px;}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--pink-d),var(--blue-d));color:white;border:none;border-radius:99px;padding:12px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:opacity .15s;}
+.btn-login:hover{opacity:.88;}
+
+/* ── APP ── */
+#app{display:none;}
+
+/* ── HEADER ── */
+header{background:linear-gradient(135deg,#F9C6D0,#C8DEFA);padding:14px 20px 12px;position:sticky;top:0;z-index:100;border-bottom:2px solid #F0B8C8;}
+.hdr-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.hdr-top h1{font-size:19px;font-weight:800;color:var(--pink-dd);flex:1;}
+.hdr-badge{font-size:10px;background:rgba(255,255,255,0.6);color:var(--text-m);padding:3px 8px;border-radius:99px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#aaa;flex-shrink:0;}
+.sync-dot.ok{background:var(--green-d);}
+.sync-dot.err{background:var(--red-d);}
+.sync-dot.spin{background:var(--cream-dd);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-logout{background:rgba(255,255,255,0.5);border:1px solid var(--pink-d);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--pink-dd);cursor:pointer;}
+.price-inputs{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.price-field{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.7);border-radius:99px;padding:5px 12px;}
+.price-field label{font-size:11px;font-weight:700;color:var(--pink-dd);white-space:nowrap;}
+.price-field input[type=number]{border:none;background:transparent;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--text);width:80px;outline:none;}
+.price-field small{font-size:10px;color:var(--text-m);}
+.kpi-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.kpi{background:rgba(255,255,255,0.65);border-radius:10px;padding:6px 12px;text-align:center;}
+.kpi label{font-size:10px;font-weight:700;color:var(--text-m);display:block;}
+.kpi .v{font-size:15px;font-weight:800;}
+.neg{color:var(--red-d);}.pos{color:var(--green-d);}
+
+/* ── TABS ── */
+.tabs{display:flex;background:#FEF0F3;border-bottom:2px solid var(--pink);overflow-x:auto;gap:2px;padding:0 12px;}
+.tab-btn{padding:10px 16px;border:none;background:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--text-m);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:var(--r-sm) var(--r-sm) 0 0;transition:all .18s;}
+.tab-btn.active{color:var(--pink-dd);border-bottom-color:var(--pink-dd);background:white;}
+
+/* ── MAIN ── */
+main{padding:16px;max-width:960px;margin:0 auto;}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+
+/* ── CARD ── */
+.card{background:white;border-radius:var(--r);border:1.5px solid var(--pink);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden;}
+.card-header{background:linear-gradient(90deg,var(--pink-bg),#EDF5FD);padding:10px 16px;border-bottom:1.5px solid var(--pink);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.card-header h2{font-size:14px;font-weight:800;color:var(--pink-dd);}
+.card-body{padding:16px;}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(min-width:600px){.stat-grid{grid-template-columns:repeat(4,1fr);}}
+.stat-box{background:var(--pink-bg);border-radius:12px;padding:10px 12px;border:1.5px solid var(--pink);}
+.stat-box .sl{font-size:10px;font-weight:700;color:var(--text-m);}
+.stat-box .sv{font-size:15px;font-weight:800;margin-top:3px;color:var(--text);}
+.stat-box .sv.gold{color:var(--cream-dd);}
+
+/* ── FILTER PILLS ── */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.filter-pill{padding:4px 14px;border-radius:99px;font-size:12px;font-weight:700;border:1.5px solid var(--pink);background:white;color:var(--text-m);cursor:pointer;transition:all .15s;}
+.filter-pill.active,.filter-pill:hover{background:var(--pink-dd);color:white;border-color:var(--pink-dd);}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--pink-bg);color:var(--pink-dd);padding:8px 10px;text-align:center;font-weight:700;border-bottom:2px solid var(--pink);white-space:nowrap;font-size:11px;}
+td{padding:7px 10px;border-bottom:1px solid #FAE8EC;text-align:center;font-size:12px;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FEF8FA;}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;}
+.tag-jd{background:#FFF0E6;color:#C05010;border:1.5px solid #F5C8A0;}
+.tag-bank{background:var(--blue-bg);color:var(--blue-dd);border:1.5px solid var(--blue);}
+.tag-physical{background:var(--green-bg);color:var(--green-d);border:1.5px solid #A8DCC0;}
+tfoot td{background:#FEF0F3;font-weight:800;color:var(--pink-dd);text-align:center;}
+th.sortable{cursor:pointer;user-select:none;}
+th.sortable:hover{background:#F5D8E0;}
+th.sort-asc::after{content:' ▲';font-size:9px;opacity:.8;}
+th.sort-desc::after{content:' ▼';font-size:9px;opacity:.8;}
+
+/* ── CALENDAR ── */
+.cal-mode-row{display:flex;gap:6px;justify-content:center;margin-bottom:12px;}
+.cal-mode-btn{padding:4px 16px;border-radius:99px;font-size:12px;font-weight:700;border:1.5px solid var(--pink);background:white;color:var(--text-m);cursor:pointer;transition:all .15s;}
+.cal-mode-btn.active{background:var(--pink-dd);color:white;border-color:var(--pink-dd);}
+.cal-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;}
+.cal-nav button{background:var(--pink-bg);border:1.5px solid var(--pink);border-radius:99px;width:32px;height:32px;cursor:pointer;color:var(--pink-dd);font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.cal-nav button:hover{background:var(--pink);}
+.cal-nav span{font-size:15px;font-weight:800;color:var(--pink-dd);min-width:110px;text-align:center;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-grid-month{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.cal-grid-year{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.cal-dow{text-align:center;font-size:11px;font-weight:700;color:var(--text-m);padding:4px 0;}
+.cal-day{border-radius:10px;padding:5px 3px;min-height:54px;text-align:center;border:1.5px solid transparent;cursor:pointer;transition:all .15s;}
+.cal-day:hover,.cal-month-cell:hover,.cal-year-cell:hover{border-color:var(--pink-d);background:var(--pink-bg);}
+.cal-day.selected,.cal-month-cell.selected,.cal-year-cell.selected{border-color:var(--pink-dd);background:var(--pink);}
+.cal-day.today-mark{border-color:var(--blue-dd);background:var(--blue-bg);}
+.cal-day.empty{pointer-events:none;}
+.cal-day.has-neg,.cal-month-cell.has-neg,.cal-year-cell.has-neg{background:var(--red-bg);border-color:#F5C0C0;}
+.cal-day.has-pos,.cal-month-cell.has-pos,.cal-year-cell.has-pos{background:var(--green-bg);border-color:#A8DCC0;}
+.day-num{font-size:12px;font-weight:800;color:var(--text);}
+.day-val{font-size:9.5px;margin-top:2px;font-weight:700;}
+.cal-month-cell,.cal-year-cell{border-radius:10px;padding:10px 6px;text-align:center;border:1.5px solid transparent;cursor:pointer;transition:all .15s;}
+.cal-cell-label{font-size:13px;font-weight:800;color:var(--text);}
+.cal-cell-val{font-size:11px;margin-top:4px;font-weight:700;}
+.cal-legend{display:flex;gap:16px;justify-content:center;margin-top:10px;}
+.cal-legend span{font-size:11px;color:var(--text-m);display:flex;align-items:center;gap:5px;}
+.cal-legend .ldot{width:12px;height:12px;border-radius:4px;}
+.chart-wrap{position:relative;height:220px;margin-top:12px;}
+
+/* ── FORMS ── */
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(min-width:600px){.form-grid{grid-template-columns:repeat(3,1fr);}}
+.form-field{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.form-field label{font-size:11px;font-weight:700;color:var(--text-m);}
+.form-field input,.form-field select{
+  width:100%;border:1.5px solid var(--pink);border-radius:8px;padding:7px 10px;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--text);
+  background:white;outline:none;transition:border .15s;min-width:0;
+}
+.form-field input:focus,.form-field select:focus{border-color:var(--pink-dd);}
+.btn-add{background:linear-gradient(135deg,var(--pink-d),var(--blue-d));color:white;border:none;border-radius:99px;padding:10px 24px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:opacity .15s;margin-top:6px;}
+.btn-add:hover{opacity:.88;}
+.btn-add:disabled{opacity:.5;cursor:not-allowed;}
+.btn-del{background:none;border:1.5px solid #F5C0C0;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--red-d);cursor:pointer;white-space:nowrap;}
+.btn-del:hover{background:var(--red-bg);}
+.btn-sell{background:none;border:1.5px solid var(--green-d);border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--green-d);cursor:pointer;white-space:nowrap;}
+.btn-sell:hover{background:var(--green-bg);}
+.btn-edit{background:none;border:1.5px solid var(--blue-dd);border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--blue-dd);cursor:pointer;white-space:nowrap;}
+.btn-edit:hover{background:var(--blue-bg);}
+
+/* ── HISTORY ── */
+.hist-row{display:grid;grid-template-columns:100px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid #FAE8EC;align-items:center;}
+.hist-row:last-child{border-bottom:none;}
+.hist-label{font-size:10px;font-weight:700;color:var(--text-l);}
+.hist-val{font-size:14px;font-weight:700;}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(253,220,228,0.82);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:white;border-radius:var(--r);border:2px solid var(--pink-d);padding:20px;width:100%;max-width:500px;box-shadow:0 8px 40px rgba(200,100,130,0.2);}
+.modal h3{font-size:16px;font-weight:800;color:var(--pink-dd);margin-bottom:14px;}
+.modal-btns{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;}
+.btn-cancel{background:var(--pink-bg);border:1.5px solid var(--pink-d);border-radius:99px;padding:10px 20px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;color:var(--pink-dd);cursor:pointer;}
+.btn-cancel:hover{background:var(--pink);}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#3D2B35;color:white;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;z-index:999;transition:transform .28s;pointer-events:none;white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+.section-note{font-size:11px;color:var(--text-l);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="licon">🍞</div>
+    <h2>香香面包岛</h2>
+    <p>请输入密码进入小岛</p>
+    <input type="password" id="pw-input" placeholder="••••••" maxlength="30" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="err" id="pw-err"></div>
+    <button class="btn-login" onclick="doLogin()">进入面包岛 🥐</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<header>
+  <div class="hdr-top">
+    <span style="font-size:20px">🍞</span>
+    <h1>香香面包岛记录</h1>
+    <span class="hdr-badge"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">连接中</span></span>
+    <span class="hdr-badge" id="time-badge"></span>
+    <button class="btn-logout" onclick="doLogout()">退出</button>
+  </div>
+  <div class="price-inputs">
+    <div class="price-field">
+      <label>🥐 当前金价</label>
+      <input type="number" id="cur-price" value="1008" min="0" step="0.01" oninput="onPriceChange()">
+      <small>元/克</small>
+    </div>
+    <div class="price-field">
+      <label>🎯 预期金价</label>
+      <input type="number" id="target-price" value="1200" min="0" step="0.01" oninput="onPriceChange()">
+      <small>元/克</small>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><label>当前价值</label><div class="v" id="kpi-value">—</div></div>
+    <div class="kpi"><label>总收益</label><div class="v" id="kpi-pnl">—</div></div>
+    <div class="kpi"><label>总收益率</label><div class="v" id="kpi-rate">—</div></div>
+    <div class="kpi"><label>持仓克数</label><div class="v" id="kpi-grams">—</div></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">🧁 总览</button>
+  <button class="tab-btn" onclick="switchTab('holdings',this)">📋 历史面粉购入记录</button>
+  <button class="tab-btn" onclick="switchTab('add',this)">➕ 新增/管理</button>
+  <button class="tab-btn" onclick="switchTab('calendar',this)">📅 日历</button>
+  <button class="tab-btn" onclick="switchTab('sold',this)">💰 已出售</button>
+</div>
+
+<main>
+
+<!-- 总览 -->
+<div id="tab-overview" class="tab-panel active">
+  <div class="card">
+    <div class="card-header"><h2>🍰 持仓概览</h2></div>
+    <div class="card-body"><div class="stat-grid" id="overview-stats"><p style="color:var(--text-l);font-size:13px">加载中…</p></div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2>📈 近期日收益</h2></div>
+    <div class="card-body" id="recent-body"><p style="color:var(--text-l);font-size:13px">加载中…</p></div>
+  </div>
+</div>
+
+<!-- 历史面粉购入记录 -->
+<div id="tab-holdings" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>🥖 历史面粉购入记录</h2>
+      <span class="section-note" id="holdings-info"></span>
+    </div>
+    <div class="card-body">
+      <div class="filter-row">
+        <button class="filter-pill active" onclick="setFilter('all',this)">全部</button>
+        <button class="filter-pill" onclick="setFilter('jd',this)">京东</button>
+        <button class="filter-pill" onclick="setFilter('bank',this)">银行</button>
+        <button class="filter-pill" onclick="setFilter('physical',this)">实物</button>
+      </div>
+      <div class="tw"><table>
+        <thead id="holdings-thead"><tr></tr></thead>
+        <tbody id="holdings-body"></tbody>
+        <tfoot id="holdings-foot"></tfoot>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/管理 -->
+<div id="tab-add" class="tab-panel">
+  <div class="card">
+    <div class="card-header"><h2>🥐 新增持仓</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-field"><label>日期</label><input type="date" id="f-date"></div>
+        <div class="form-field"><label>渠道</label>
+          <select id="f-channel"><option value="jd">京东</option><option value="bank">银行</option><option value="physical">实物</option></select>
+        </div>
+        <div class="form-field"><label>买入价（元/克）</label><input type="number" id="f-price" placeholder="1008.00" step="0.01"></div>
+        <div class="form-field"><label>手续费（元）</label><input type="number" id="f-fee" value="4.071" step="0.001"></div>
+        <div class="form-field"><label>克数（g）</label><input type="number" id="f-grams" value="1" step="0.001"></div>
+        <div class="form-field"><label>总成本（留空自动算）</label><input type="number" id="f-cost" placeholder="自动计算" step="0.01"></div>
+      </div>
+      <button class="btn-add" id="btn-add-h" onclick="addHolding()">🍞 加入面包岛</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2>⚙️ 记录管理</h2></div>
+    <div class="card-body">
+      <div class="filter-row">
+        <button class="filter-pill active" onclick="setManageFilter('all',this)">全部</button>
+        <button class="filter-pill" onclick="setManageFilter('jd',this)">京东</button>
+        <button class="filter-pill" onclick="setManageFilter('bank',this)">银行</button>
+        <button class="filter-pill" onclick="setManageFilter('physical',this)">实物</button>
+      </div>
+      <div class="tw"><table>
+        <thead id="manage-thead"><tr></tr></thead>
+        <tbody id="manage-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- 日历 -->
+<div id="tab-calendar" class="tab-panel">
+  <div class="card">
+    <div class="card-header"><h2>📅 收益日历</h2></div>
+    <div class="card-body">
+      <div class="cal-mode-row">
+        <button class="cal-mode-btn active" onclick="setCalMode('day',this)">日收益</button>
+        <button class="cal-mode-btn" onclick="setCalMode('month',this)">月收益</button>
+        <button class="cal-mode-btn" onclick="setCalMode('year',this)">年收益</button>
+      </div>
+      <div class="cal-nav">
+        <button onclick="calPrev()">‹</button>
+        <span id="cal-title"></span>
+        <button onclick="calNext()">›</button>
+      </div>
+      <!-- 日历网格容器，内容由JS渲染 -->
+      <div id="cal-header-row" class="cal-grid">
+        <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
+        <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div><div class="cal-dow">六</div>
+      </div>
+      <div id="cal-days"></div>
+      <div class="cal-legend" id="cal-legend">
+        <span><div class="ldot" style="background:var(--green-bg);border:1.5px solid #A8DCC0"></div>盈利</span>
+        <span><div class="ldot" style="background:var(--red-bg);border:1.5px solid #F5C0C0"></div>亏损</span>
+        <span><div class="ldot" style="background:var(--blue-bg);border:1.5px solid var(--blue-dd)"></div>今日</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 详情 + 录入 -->
+  <div class="card" id="day-card" style="display:none">
+    <div class="card-header">
+      <h2 id="day-card-title">收益详情</h2>
+    </div>
+    <div class="card-body">
+      <div id="day-card-body" style="margin-bottom:14px"></div>
+      <div style="border-top:1.5px dashed var(--pink);padding-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-m);margin-bottom:8px">✏️ 录入 / 修改收益</div>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+          <div class="form-field" style="flex:1;min-width:150px">
+            <label>金额（元，亏损填负数）</label>
+            <input type="number" id="pnl-input" placeholder="-792.69" step="0.01">
+          </div>
+          <button class="btn-add" id="btn-save-pnl" style="margin-top:0" onclick="saveDayPnl()">保存 🍰</button>
+          <button class="btn-del" id="day-del-btn" onclick="deleteDayPnl()" style="display:none;padding:10px 16px;font-size:13px">删除 🗑️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 收益走势图 -->
+  <div class="card">
+    <div class="card-header"><h2>📊 收益走势图</h2></div>
+    <div class="card-body">
+      <div class="chart-wrap"><canvas id="pnl-chart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- 已出售 -->
+<div id="tab-sold" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <h2>🎀 已出售记录</h2>
+      <div id="sold-summary" style="font-size:12px;font-weight:700;color:var(--green-d);background:var(--green-bg);padding:4px 12px;border-radius:99px;border:1.5px solid #A8DCC0"></div>
+    </div>
+    <div class="card-body">
+      <div class="tw"><table>
+        <thead id="sold-thead"><tr></tr></thead>
+        <tbody id="sold-body"></tbody>
+        <tfoot id="sold-foot"></tfoot>
+      </table></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2>➕ 单独新增出售记录</h2></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-field"><label>出售日期</label><input type="date" id="sf-date"></div>
+        <div class="form-field"><label>渠道</label>
+          <select id="sf-channel"><option value="jd">京东</option><option value="bank">银行</option><option value="physical">实物</option></select>
+        </div>
+        <div class="form-field"><label>买入价（元/克）</label><input type="number" id="sf-bp" placeholder="1008.00" step="0.01"></div>
+        <div class="form-field"><label>卖出价（元/克）</label><input type="number" id="sf-sp" placeholder="1100.00" step="0.01"></div>
+        <div class="form-field"><label>手续费（元）</label><input type="number" id="sf-fee" value="0" step="0.001"></div>
+        <div class="form-field"><label>克数（g）</label><input type="number" id="sf-grams" value="1" step="0.001"></div>
+        <div class="form-field"><label>买入成本（留空自动算）</label><input type="number" id="sf-cost" placeholder="自动计算" step="0.01"></div>
+      </div>
+      <button class="btn-add" id="btn-add-sold" onclick="addSoldRecord()" style="background:linear-gradient(135deg,var(--green-d),var(--blue-d))">🎀 加入出售记录</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- 编辑持仓 modal -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal">
+    <h3>✏️ 修改持仓记录</h3>
+    <div class="form-grid">
+      <div class="form-field"><label>日期</label><input type="date" id="e-date"></div>
+      <div class="form-field"><label>渠道</label>
+        <select id="e-channel"><option value="jd">京东</option><option value="bank">银行</option><option value="physical">实物</option></select>
+      </div>
+      <div class="form-field"><label>买入价（元/克）</label><input type="number" id="e-price" step="0.01"></div>
+      <div class="form-field"><label>手续费（元）</label><input type="number" id="e-fee" step="0.001"></div>
+      <div class="form-field"><label>克数（g）</label><input type="number" id="e-grams" step="0.001"></div>
+      <div class="form-field"><label>总成本（元）</label><input type="number" id="e-cost" step="0.01"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消 🥐</button>
+      <button class="btn-add" style="margin-top:0" onclick="saveEdit()">保存 🍰</button>
+    </div>
+  </div>
+</div>
+
+<!-- 卖出确认 modal -->
+<div class="modal-bg" id="sell-modal">
+  <div class="modal">
+    <h3>💰 确认出售</h3>
+    <div id="sell-preview" style="background:var(--pink-bg);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px;color:var(--text-m)"></div>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-bottom:4px">
+      <div class="form-field">
+        <label>卖出价（元/克）</label>
+        <input type="number" id="sell-price" placeholder="1100.00" step="0.01" oninput="calcSellProfit()">
+      </div>
+      <div class="form-field">
+        <label>卖出收益预览</label>
+        <div id="sell-profit-preview" style="padding:7px 10px;border-radius:8px;background:var(--pink-bg);border:1.5px solid var(--pink);font-size:13px;font-weight:800;min-height:38px;display:flex;align-items:center">—</div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeSellModal()">取消 🥐</button>
+      <button class="btn-add" style="margin-top:0;background:linear-gradient(135deg,var(--green-d),var(--blue-d))" onclick="confirmSell()">确认出售 🎀</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══ CONFIG ══ */
+const SUPABASE_URL = 'https://mlctnwuahnxvkzzbbkja.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_GsMcyTuFFrdRGfT_hhpw4Q_cG5jIpXO';
+const APP_PASSWORD = 'bread2026'; // ← 在这里改密码
+
+/* ══ STATE ══ */
+let HOLDINGS = [];
+let SOLD_LIST = [];
+let DAILY_PNL = {};
+let holdingFilter = 'all';
+let manageFilter  = 'all';
+let calMode = 'day';
+
+// Sort state: { col: string, dir: 'asc'|'desc' }
+const sortState = {
+  holdings: { col: 'date', dir: 'asc' },
+  manage:   { col: 'date', dir: 'asc' },
+  sold:     { col: 'date', dir: 'asc' },
+  // sold supports: date, ch, bp, sp, fee, g, cost, profit
+};
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth() + 1;
+let selectedKey = null;
+let editingId = null;
+let sellingId = null;
+let priceTimer = null;
+let chartInst = null;
+
+/* ══ LOGIN ══ */
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === APP_PASSWORD) {
+    sessionStorage.setItem('bi_ok','1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('pw-err').textContent = '密码不对，再试试 🍞';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+function doLogout(){ sessionStorage.removeItem('bi_ok'); location.reload(); }
+
+/* ══ SUPABASE ══ */
+const SB_H = {
+  'Content-Type':'application/json',
+  'apikey':SUPABASE_KEY,
+  'Authorization':'Bearer '+SUPABASE_KEY,
+  'Prefer':'return=representation'
+};
+const dbGet    = (t,q='')  => fetch(`${SUPABASE_URL}/rest/v1/${t}?${q}`,{headers:SB_H}).then(r=>r.ok?r.json():r.text().then(e=>{throw new Error(e)}));
+const dbInsert = (t,b)     => fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:SB_H,body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.text().then(e=>{throw new Error(e)}));
+const dbUpdate = (t,q,b)   => fetch(`${SUPABASE_URL}/rest/v1/${t}?${q}`,{method:'PATCH',headers:SB_H,body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.text().then(e=>{throw new Error(e)}));
+const dbUpsert = (t,b)     => fetch(`${SUPABASE_URL}/rest/v1/${t}`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=representation'},body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.text().then(e=>{throw new Error(e)}));
+const dbDelete = (t,q)     => fetch(`${SUPABASE_URL}/rest/v1/${t}?${q}`,{method:'DELETE',headers:SB_H}).then(r=>{if(!r.ok)return r.text().then(e=>{throw new Error(e)})});
+
+/* ══ SYNC STATUS ══ */
+function sync(state,msg){ document.getElementById('sync-dot').className='sync-dot '+state; document.getElementById('sync-text').textContent=msg; }
+
+/* ══ HELPERS ══ */
+const curP  = () => parseFloat(document.getElementById('cur-price').value)||0;
+const tarP  = () => parseFloat(document.getElementById('target-price').value)||0;
+const fmt   = n => (n>=0?'+':'')+n.toFixed(2);
+const fmtY  = n => '¥'+Math.abs(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct   = (n,d) => d?(n/d*100).toFixed(3)+'%':'—';
+const cc    = n => n>=0?'pos':'neg';
+const pad2  = n => String(n).padStart(2,'0');
+const chTag = ch => ch==='jd'?'<span class="tag tag-jd">京东</span>':ch==='bank'?'<span class="tag tag-bank">银行</span>':'<span class="tag tag-physical">实物</span>';
+const toast = msg => { const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600); };
+const safeFloat = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
+
+/* ══ LOAD ══ */
+async function loadAll() {
+  sync('spin','同步中…');
+  try {
+    const [holdRows, soldRows, pnlRows, settings] = await Promise.all([
+      dbGet('holdings','order=date.asc,id.asc'),
+      dbGet('sold','order=date.asc,id.asc').catch(()=>[]),
+      dbGet('daily_pnl','order=date_key.asc'),
+      dbGet('settings','key=in.(cur_price,target_price)').catch(()=>[])
+    ]);
+    HOLDINGS = holdRows.map(r=>({id:r.id,date:r.date,ch:r.ch,bp:+r.bp,fee:+r.fee,g:+r.g,cost:+r.cost}));
+    SOLD_LIST = soldRows.map(r=>({id:r.id,date:r.date,ch:r.ch,bp:+r.bp,sp:r.sp?+r.sp:null,fee:+r.fee,g:+r.g,cost:+r.cost}));
+    DAILY_PNL = {};
+    pnlRows.forEach(r=>{ DAILY_PNL[r.date_key]=+r.pnl; });
+    settings.forEach(s=>{
+      if(s.key==='cur_price') document.getElementById('cur-price').value=s.value;
+      if(s.key==='target_price') document.getElementById('target-price').value=s.value;
+    });
+    sync('ok','已同步');
+    recalcAll();
+  } catch(e) {
+    sync('err','离线');
+    toast('⚠️ 云端连接失败');
+    lsLoad(); recalcAll();
+  }
+}
+
+/* ══ PRICE ══ */
+function onPriceChange() {
+  recalcAll();
+  clearTimeout(priceTimer);
+  priceTimer = setTimeout(async()=>{
+    try{
+      await dbUpsert('settings',[{key:'cur_price',value:String(curP())},{key:'target_price',value:String(tarP())}]);
+      localStorage.setItem('bi_cp',curP()); localStorage.setItem('bi_tp',tarP());
+    }catch(e){}
+  },1000);
+}
+
+/* ══ RECALC ══ */
+function recalcAll() {
+  const tg=HOLDINGS.reduce((s,h)=>s+h.g,0);
+  const tc=HOLDINGS.reduce((s,h)=>s+h.cost,0);
+  const tv=tg*curP(), pnl=tv-tc;
+  document.getElementById('kpi-value').textContent=fmtY(tv);
+  document.getElementById('kpi-pnl').textContent=fmt(pnl)+'元';
+  document.getElementById('kpi-pnl').className='v '+cc(pnl);
+  document.getElementById('kpi-rate').textContent=pct(pnl,tc);
+  document.getElementById('kpi-rate').className='v '+cc(pnl);
+  document.getElementById('kpi-grams').textContent=tg.toFixed(2)+'g';
+  renderOverview(); renderHoldings(); renderManage(); renderCal(); renderSold(); renderChart();
+}
+
+/* ══ OVERVIEW ══ */
+function renderOverview() {
+  const p=curP(),pt=tarP();
+  const tg=HOLDINGS.reduce((s,h)=>s+h.g,0);
+  const tc=HOLDINGS.reduce((s,h)=>s+h.cost,0);
+  const tf=HOLDINGS.reduce((s,h)=>s+h.fee,0);
+  const tv=tg*p, pnl=tv-tc, net=pnl-tf, expPnl=tg*pt-tc, avg=tg?tc/tg:0;
+  document.getElementById('overview-stats').innerHTML=`
+    <div class="stat-box"><div class="sl">总持仓克数</div><div class="sv gold">${tg.toFixed(3)}g</div></div>
+    <div class="stat-box"><div class="sl">总成本</div><div class="sv gold">${fmtY(tc)}</div></div>
+    <div class="stat-box"><div class="sl">当前价值</div><div class="sv gold">${fmtY(tv)}</div></div>
+    <div class="stat-box"><div class="sl">总收益</div><div class="sv ${cc(pnl)}">${fmt(pnl)}</div></div>
+    <div class="stat-box"><div class="sl">总收益率</div><div class="sv ${cc(pnl)}">${pct(pnl,tc)}</div></div>
+    <div class="stat-box"><div class="sl">净收益（扣手续费）</div><div class="sv ${cc(net)}">${fmt(net)}</div></div>
+    <div class="stat-box"><div class="sl">均价</div><div class="sv gold">${avg.toFixed(2)}元/克</div></div>
+    <div class="stat-box"><div class="sl">预期收益 @${pt}元</div><div class="sv ${cc(expPnl)}">${fmt(expPnl)}</div></div>`;
+  const keys=Object.keys(DAILY_PNL).sort().slice(-10).reverse();
+  document.getElementById('recent-body').innerHTML=keys.length
+    ?keys.map(k=>`<div class="hist-row"><span style="font-size:11px;color:var(--text-m)">${k}</span><span><div class="hist-label">当日收益</div><div class="hist-val ${cc(DAILY_PNL[k])}">${fmt(DAILY_PNL[k])} 元</div></span></div>`).join('')
+    :'<p style="font-size:13px;color:var(--text-l)">暂无收益记录，去日历页录入 🍞</p>';
+}
+
+/* ══ SORT HELPER ══ */
+function sortList(list, col, dir, priceForVal) {
+  const p = priceForVal || 0;
+  const val = h => {
+    if(col==='sp')   return h.sp || 0;
+    if(col==='profit') return h.sp ? (h.sp-h.bp)*h.g-(h.fee||0) : -Infinity;
+    if(col==='date') return h.date;
+    if(col==='ch')   return h.ch;
+    if(col==='bp')   return h.bp;
+    if(col==='fee')  return h.fee;
+    if(col==='g')    return h.g;
+    if(col==='cost') return h.cost;
+    if(col==='val')  return h.g * p;
+    if(col==='pnl')  return h.g * p - h.cost;
+    if(col==='rate') return h.cost ? (h.g * p - h.cost) / h.cost : 0;
+    return h[col] ?? 0;
+  };
+  return [...list].sort((a,b) => {
+    const av=val(a), bv=val(b);
+    const cmp = typeof av==='string' ? av.localeCompare(bv) : av - bv;
+    return dir==='asc' ? cmp : -cmp;
+  });
+}
+
+function buildThead(theadId, cols, tableKey) {
+  // cols: [{label, col}]
+  const s = sortState[tableKey];
+  const ths = cols.map(({label, col}) => {
+    if(!col) return `<th>${label}</th>`;
+    const cls = col===s.col ? (s.dir==='asc'?'sortable sort-asc':'sortable sort-desc') : 'sortable';
+    return `<th class="${cls}" onclick="doSort('${tableKey}','${col}')">${label}</th>`;
+  }).join('');
+  document.getElementById(theadId).innerHTML = `<tr>${ths}</tr>`;
+}
+
+function doSort(tableKey, col) {
+  const s = sortState[tableKey];
+  if(s.col === col) s.dir = s.dir==='asc' ? 'desc' : 'asc';
+  else { s.col = col; s.dir = 'asc'; }
+  if(tableKey==='holdings') renderHoldings();
+  else if(tableKey==='manage') renderManage();
+  else renderSold();
+}
+
+/* ══ HOLDINGS TABLE (with filter + sort) ══ */
+function setFilter(f, btn) {
+  holdingFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderHoldings();
+}
+function renderHoldings() {
+  buildThead('holdings-thead', [
+    {label:'日期',col:'date'},{label:'渠道',col:'ch'},
+    {label:'买入价',col:'bp'},{label:'手续费',col:'fee'},
+    {label:'克数',col:'g'},{label:'成本',col:'cost'},
+    {label:'当前价值',col:'val'},{label:'收益',col:'pnl'},{label:'收益率',col:'rate'}
+  ], 'holdings');
+  const p = curP();
+  const base = holdingFilter==='all' ? HOLDINGS : HOLDINGS.filter(h=>h.ch===holdingFilter);
+  const list = sortList(base, sortState.holdings.col, sortState.holdings.dir, p);
+  let html='', tg=0, tc=0;
+  list.forEach(h=>{
+    const val=h.g*p, pnl=val-h.cost, rate=h.cost?pnl/h.cost*100:0;
+    tg+=h.g; tc+=h.cost;
+    html+=`<tr>
+      <td>${h.date}</td><td>${chTag(h.ch)}</td>
+      <td>${h.bp.toFixed(2)}</td><td>${h.fee.toFixed(3)}</td>
+      <td>${h.g}g</td><td>${fmtY(h.cost)}</td><td>${fmtY(val)}</td>
+      <td class="${cc(pnl)}">${fmt(pnl)}</td>
+      <td class="${cc(rate)}">${rate.toFixed(3)}%</td>
+    </tr>`;
+  });
+  document.getElementById('holdings-body').innerHTML = html||'<tr><td colspan="9" style="text-align:center;color:var(--text-l);padding:20px">暂无记录</td></tr>';
+  const tv=tg*p, pnl=tv-tc;
+  document.getElementById('holdings-foot').innerHTML = tg?`<tr><td colspan="4">筛选合计</td><td>${tg.toFixed(3)}g</td><td>${fmtY(tc)}</td><td>${fmtY(tv)}</td><td class="${cc(pnl)}">${fmt(pnl)}</td><td class="${cc(pnl)}">${pct(pnl,tc)}</td></tr>`:'';
+  document.getElementById('holdings-info').textContent = `共${list.length}笔 · ${tg.toFixed(2)}g · 均价${tg?(tc/tg).toFixed(2):'—'}元`;
+}
+
+/* ══ MANAGE TABLE (with filter + sort) ══ */
+function setManageFilter(f, btn) {
+  manageFilter = f;
+  document.querySelectorAll('#tab-add .filter-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderManage();
+}
+function renderManage() {
+  buildThead('manage-thead', [
+    {label:'日期',col:'date'},{label:'渠道',col:'ch'},
+    {label:'买入价',col:'bp'},{label:'克数',col:'g'},
+    {label:'成本',col:'cost'},{label:'操作',col:null}
+  ], 'manage');
+  const base = manageFilter==='all' ? HOLDINGS : HOLDINGS.filter(h=>h.ch===manageFilter);
+  const list = sortList(base, sortState.manage.col, sortState.manage.dir, curP());
+  document.getElementById('manage-body').innerHTML = list.map(h=>`<tr>
+    <td>${h.date}</td><td>${chTag(h.ch)}</td>
+    <td>${h.bp.toFixed(2)}</td><td>${h.g}g</td><td>${fmtY(h.cost)}</td>
+    <td><button class="btn-edit" onclick="openEdit(${h.id})">编辑</button> <button class="btn-sell" onclick="openSell(${h.id})">卖出 💰</button> <button class="btn-del" onclick="deleteHolding(${h.id})">删除</button></td>
+  </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-l);padding:16px">暂无记录</td></tr>';
+}
+
+/* ══ SOLD TABLE (with sort + cumulative) ══ */
+function renderSold() {
+  buildThead('sold-thead', [
+    {label:'出售日期',col:'date'},{label:'渠道',col:'ch'},
+    {label:'买入价',col:'bp'},{label:'卖出价',col:'sp'},
+    {label:'手续费',col:'fee'},{label:'克数',col:'g'},
+    {label:'买入成本',col:'cost'},{label:'卖出收益',col:'profit'}
+  ], 'sold');
+  const list = sortList(SOLD_LIST, sortState.sold.col, sortState.sold.dir);
+  let totalProfit = 0, totalCost = 0;
+  const rows = list.map(s=>{
+    const sp = s.sp || 0;
+    const profit = sp ? (sp - s.bp) * s.g - (s.fee||0) : null;
+    if(profit !== null) totalProfit += profit;
+    totalCost += s.cost;
+    const profitCell = profit!==null
+      ? `<span class="${cc(profit)}">${fmt(profit)}</span>`
+      : '<span style="color:var(--text-l)">—</span>';
+    return `<tr>
+      <td>${s.date}</td><td>${chTag(s.ch)}</td>
+      <td>${s.bp.toFixed(2)}</td>
+      <td>${sp ? sp.toFixed(2) : '<span style="color:var(--text-l)">—</span>'}</td>
+      <td>${s.fee||'—'}</td><td>${s.g}g</td>
+      <td>${fmtY(s.cost)}</td><td>${profitCell}</td>
+    </tr>`;
+  });
+  document.getElementById('sold-body').innerHTML = rows.length
+    ? rows.join('')
+    : '<tr><td colspan="8" style="text-align:center;color:var(--text-l);padding:20px">暂无出售记录</td></tr>';
+  document.getElementById('sold-foot').innerHTML = list.length
+    ? `<tr><td colspan="6">合计</td><td>${fmtY(totalCost)}</td><td class="${cc(totalProfit)}">${fmt(totalProfit)}</td></tr>`
+    : '';
+  // Right-top summary badge
+  const hasProfitData = SOLD_LIST.some(s=>s.sp);
+  const allProfit = SOLD_LIST.reduce((sum,s)=> s.sp ? sum + (s.sp-s.bp)*s.g-(s.fee||0) : sum, 0);
+  document.getElementById('sold-summary').textContent = hasProfitData
+    ? `累计卖出收益：${fmt(allProfit)} 元`
+    : '暂无卖出价数据';
+  document.getElementById('sold-summary').className = hasProfitData
+    ? `${cc(allProfit)==='pos'?'':'neg-badge'}` : '';
+  document.getElementById('sold-summary').style.color = hasProfitData
+    ? (allProfit>=0?'var(--green-d)':'var(--red-d)') : 'var(--text-l)';
+  document.getElementById('sold-summary').style.background = hasProfitData
+    ? (allProfit>=0?'var(--green-bg)':'var(--red-bg)') : 'var(--pink-bg)';
+  document.getElementById('sold-summary').style.borderColor = hasProfitData
+    ? (allProfit>=0?'#A8DCC0':'#F5C0C0') : 'var(--pink)';
+}
+
+/* ══ ADD HOLDING ══ */
+async function addHolding() {
+  const date=document.getElementById('f-date').value;
+  const ch=document.getElementById('f-channel').value;
+  const bp=safeFloat(document.getElementById('f-price').value);
+  const fee=safeFloat(document.getElementById('f-fee').value)||0;
+  const g=safeFloat(document.getElementById('f-grams').value);
+  let cost=safeFloat(document.getElementById('f-cost').value);
+  if(!date||bp===null||g===null){toast('请填写日期、买入价和克数 🥖');return;}
+  if(cost===null) cost=parseFloat((bp*g).toFixed(4));
+  const btn=document.getElementById('btn-add-h');
+  btn.disabled=true; btn.textContent='保存中…'; sync('spin','保存中…');
+  try {
+    const row={date,ch,bp,fee,g,cost};
+    const res=await dbInsert('holdings',row);
+    const newId=Array.isArray(res)&&res[0]?res[0].id:Date.now();
+    HOLDINGS.push({id:newId,...row});
+    HOLDINGS.sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+    document.getElementById('f-price').value='';
+    document.getElementById('f-cost').value='';
+    sync('ok','已同步'); recalcAll(); toast('🎉 已加入面包岛！');
+  }catch(e){ sync('err','保存失败'); toast('⚠️ 保存失败：'+e.message); }
+  btn.disabled=false; btn.textContent='🍞 加入面包岛';
+}
+
+/* ══ DELETE HOLDING ══ */
+async function deleteHolding(id) {
+  if(!confirm('确定删除这条记录？🍞'))return;
+  sync('spin','删除中…');
+  try{
+    await dbDelete('holdings',`id=eq.${id}`);
+    HOLDINGS=HOLDINGS.filter(h=>h.id!==id);
+    sync('ok','已同步'); recalcAll(); toast('已删除');
+  }catch(e){ sync('err','删除失败'); toast('⚠️ 删除失败：'+e.message); }
+}
+
+/* ══ EDIT MODAL ══ */
+function openEdit(id) {
+  editingId=id;
+  const h=HOLDINGS.find(x=>x.id===id);
+  document.getElementById('e-date').value=h.date;
+  document.getElementById('e-channel').value=h.ch;
+  document.getElementById('e-price').value=h.bp;
+  document.getElementById('e-fee').value=h.fee;
+  document.getElementById('e-grams').value=h.g;
+  document.getElementById('e-cost').value=h.cost;
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); editingId=null; }
+async function saveEdit() {
+  const h=HOLDINGS.find(x=>x.id===editingId); if(!h)return;
+  const upd={
+    date: document.getElementById('e-date').value,
+    ch:   document.getElementById('e-channel').value,
+    bp:   safeFloat(document.getElementById('e-price').value),
+    fee:  safeFloat(document.getElementById('e-fee').value)||0,
+    g:    safeFloat(document.getElementById('e-grams').value),
+    cost: safeFloat(document.getElementById('e-cost').value)
+  };
+  if(upd.bp===null||upd.g===null||upd.cost===null){toast('请检查数值填写是否正确 🥖');return;}
+  closeModal(); sync('spin','保存中…');
+  try{
+    // 只更新非 id 字段，明确排除 id
+    const {date,ch,bp,fee,g,cost}=upd;
+    await dbUpdate('holdings',`id=eq.${editingId}`,{date,ch,bp,fee,g,cost});
+    Object.assign(h,upd);
+    HOLDINGS.sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+    sync('ok','已同步'); recalcAll(); toast('✅ 修改已保存');
+  }catch(e){ sync('err','保存失败'); toast('⚠️ 保存失败：'+e.message); }
+}
+
+/* ══ SELL ══ */
+function openSell(id) {
+  sellingId=id;
+  const h=HOLDINGS.find(x=>x.id===id);
+  document.getElementById('sell-preview').innerHTML=
+    `<strong>${h.date}</strong> · ${h.ch==='jd'?'京东':h.ch==='bank'?'银行':'实物'} · 买入价 <strong>${h.bp.toFixed(2)}</strong> 元 · <strong>${h.g}g</strong> · 成本 <strong>${fmtY(h.cost)}</strong>`;
+  document.getElementById('sell-price').value='';
+  document.getElementById('sell-profit-preview').textContent='—';
+  document.getElementById('sell-profit-preview').style.color='var(--text-m)';
+  document.getElementById('sell-modal').classList.add('open');
+}
+function calcSellProfit() {
+  const h=HOLDINGS.find(x=>x.id===sellingId); if(!h)return;
+  const sp=safeFloat(document.getElementById('sell-price').value);
+  const el=document.getElementById('sell-profit-preview');
+  if(sp===null){el.textContent='—';el.style.color='var(--text-m)';return;}
+  const profit=(sp-h.bp)*h.g - h.fee;
+  el.textContent=`${fmt(profit)} 元`;
+  el.style.color=profit>=0?'var(--green-d)':'var(--red-d)';
+}
+function closeSellModal(){ document.getElementById('sell-modal').classList.remove('open'); sellingId=null; }
+async function confirmSell() {
+  const h=HOLDINGS.find(x=>x.id===sellingId); if(!h)return;
+  const sp=safeFloat(document.getElementById('sell-price').value);
+  if(sp===null){toast('请输入卖出价格 🥐');return;}
+  closeSellModal(); sync('spin','处理中…');
+  try{
+    const soldRow={date:h.date,ch:h.ch,bp:h.bp,sp,fee:h.fee,g:h.g,cost:h.cost};
+    const res=await dbInsert('sold',soldRow);
+    await dbDelete('holdings',`id=eq.${h.id}`);
+    const newId=Array.isArray(res)&&res[0]?res[0].id:Date.now();
+    SOLD_LIST.push({id:newId,...soldRow});
+    HOLDINGS=HOLDINGS.filter(x=>x.id!==h.id);
+    sync('ok','已同步'); recalcAll(); toast('🎀 已移至出售记录！');
+  }catch(e){ sync('err','操作失败'); toast('⚠️ 操作失败：'+e.message); }
+}
+
+/* ══ ADD SOLD RECORD DIRECTLY ══ */
+async function addSoldRecord() {
+  const date=document.getElementById('sf-date').value;
+  const ch=document.getElementById('sf-channel').value;
+  const bp=safeFloat(document.getElementById('sf-bp').value);
+  const sp=safeFloat(document.getElementById('sf-sp').value);
+  const fee=safeFloat(document.getElementById('sf-fee').value)||0;
+  const g=safeFloat(document.getElementById('sf-grams').value);
+  let cost=safeFloat(document.getElementById('sf-cost').value);
+  if(!date||bp===null||g===null){toast('请填写出售日期、买入价和克数 🥖');return;}
+  if(cost===null) cost=parseFloat((bp*g).toFixed(4));
+  const btn=document.getElementById('btn-add-sold');
+  btn.disabled=true; btn.textContent='保存中…'; sync('spin','保存中…');
+  try{
+    const row={date,ch,bp,sp:sp||null,fee,g,cost};
+    const res=await dbInsert('sold',row);
+    const newId=Array.isArray(res)&&res[0]?res[0].id:Date.now();
+    SOLD_LIST.push({id:newId,...row});
+    document.getElementById('sf-bp').value='';
+    document.getElementById('sf-sp').value='';
+    document.getElementById('sf-cost').value='';
+    sync('ok','已同步'); renderSold(); toast('🎀 出售记录已添加！');
+  }catch(e){ sync('err','保存失败'); toast('⚠️ 保存失败：'+e.message); }
+  btn.disabled=false; btn.textContent='🎀 加入出售记录';
+}
+
+/* ══ CALENDAR MODE ══ */
+function setCalMode(mode, btn) {
+  calMode=mode;
+  document.querySelectorAll('.cal-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Show/hide day-of-week header
+  document.getElementById('cal-header-row').style.display = mode==='day'?'grid':'none';
+  document.getElementById('day-card').style.display='none';
+  selectedKey=null;
+  renderCal(); renderChart();
+}
+
+/* ══ CALENDAR RENDER ══ */
+function renderCal() {
+  if(calMode==='day') renderCalDay();
+  else if(calMode==='month') renderCalMonth();
+  else renderCalYear();
+}
+
+function renderCalDay() {
+  document.getElementById('cal-title').textContent=`${calYear}年${pad2(calMonth)}月`;
+  const first=new Date(calYear,calMonth-1,1).getDay();
+  const days=new Date(calYear,calMonth,0).getDate();
+  const today=new Date();
+  let html='';
+  for(let i=0;i<first;i++) html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=days;d++){
+    const key=`${calYear}-${pad2(calMonth)}-${pad2(d)}`;
+    const pnl=DAILY_PNL[key];
+    const isTod=today.getFullYear()===calYear&&today.getMonth()===calMonth-1&&today.getDate()===d;
+    let c='cal-day';
+    if(key===selectedKey) c+=' selected';
+    else if(isTod) c+=' today-mark';
+    else if(pnl!==undefined&&pnl>0) c+=' has-pos';
+    else if(pnl!==undefined&&pnl<0) c+=' has-neg';
+    html+=`<div class="${c}" onclick="showPeriod('${key}')"><div class="day-num">${d}</div>${pnl!==undefined?`<div class="day-val ${cc(pnl)}">${pnl>=0?'+':''}${pnl.toFixed(2)}</div>`:''}</div>`;
+  }
+  document.getElementById('cal-days').className='cal-grid';
+  document.getElementById('cal-days').innerHTML=html;
+  document.getElementById('cal-legend').style.display='flex';
+}
+
+function renderCalMonth() {
+  document.getElementById('cal-title').textContent=`${calYear}年`;
+  document.getElementById('cal-legend').style.display='none';
+  let html='';
+  for(let m=1;m<=12;m++){
+    const prefix=`${calYear}-${pad2(m)}`;
+    const total=Object.entries(DAILY_PNL)
+      .filter(([k])=>k.startsWith(prefix))
+      .reduce((s,[,v])=>s+v,0);
+    const hasData=Object.keys(DAILY_PNL).some(k=>k.startsWith(prefix));
+    let c='cal-month-cell';
+    if(prefix===selectedKey) c+=' selected';
+    else if(hasData&&total>0) c+=' has-pos';
+    else if(hasData&&total<0) c+=' has-neg';
+    html+=`<div class="${c}" onclick="showPeriod('${prefix}')">
+      <div class="cal-cell-label">${m}月</div>
+      ${hasData?`<div class="cal-cell-val ${cc(total)}">${fmt(total)}</div>`:'<div class="cal-cell-val" style="color:var(--text-l)">—</div>'}
+    </div>`;
+  }
+  document.getElementById('cal-days').className='cal-grid-month';
+  document.getElementById('cal-days').innerHTML=html;
+}
+
+function renderCalYear() {
+  document.getElementById('cal-title').textContent='年度收益';
+  document.getElementById('cal-legend').style.display='none';
+  const years=[...new Set(Object.keys(DAILY_PNL).map(k=>k.slice(0,4)))].sort();
+  if(!years.length){ document.getElementById('cal-days').innerHTML='<p style="font-size:13px;color:var(--text-l);padding:12px 0">暂无数据</p>'; return; }
+  let html='';
+  years.forEach(y=>{
+    const total=Object.entries(DAILY_PNL).filter(([k])=>k.startsWith(y)).reduce((s,[,v])=>s+v,0);
+    let c='cal-year-cell';
+    if(y===selectedKey) c+=' selected';
+    else if(total>0) c+=' has-pos';
+    else if(total<0) c+=' has-neg';
+    html+=`<div class="${c}" onclick="showPeriod('${y}')">
+      <div class="cal-cell-label">${y}年</div>
+      <div class="cal-cell-val ${cc(total)}">${fmt(total)}</div>
+    </div>`;
+  });
+  document.getElementById('cal-days').className='cal-grid-year';
+  document.getElementById('cal-days').innerHTML=html;
+}
+
+function showPeriod(key) {
+  selectedKey=key;
+  let title, pnl, isDay=false;
+  if(calMode==='day'){
+    isDay=true; pnl=DAILY_PNL[key]; title=key;
+  } else if(calMode==='month'){
+    title=`${key.slice(0,4)}年${parseInt(key.slice(5))}月`;
+    pnl=Object.entries(DAILY_PNL).filter(([k])=>k.startsWith(key)).reduce((s,[,v])=>s+v,0);
+    const cnt=Object.keys(DAILY_PNL).filter(k=>k.startsWith(key)).length;
+    title+=`（${cnt}天有数据）`;
+  } else {
+    title=`${key}年度`;
+    pnl=Object.entries(DAILY_PNL).filter(([k])=>k.startsWith(key)).reduce((s,[,v])=>s+v,0);
+  }
+  document.getElementById('day-card-title').textContent=title;
+  document.getElementById('day-card').style.display='block';
+  document.getElementById('day-del-btn').style.display=(isDay&&pnl!==undefined)?'inline-block':'none';
+  document.getElementById('pnl-input').style.display=isDay?'block':'none';
+  document.getElementById('btn-save-pnl').style.display=isDay?'inline-block':'none';
+  if(isDay) document.getElementById('pnl-input').value=pnl!==undefined?pnl:'';
+  document.getElementById('day-card-body').innerHTML = (pnl!==undefined&&pnl!==0)
+    ?`<div class="stat-grid" style="max-width:240px"><div class="stat-box"><div class="sl">${calMode==='day'?'当日':'合计'}收益</div><div class="sv ${cc(pnl)}">${fmt(pnl)} 元</div></div></div>`
+    :`<p style="font-size:13px;color:var(--text-l)">${isDay?'暂无数据，在下方录入 🍞':'暂无数据 🍞'}</p>`;
+  renderCal();
+  document.getElementById('day-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function saveDayPnl() {
+  if(!selectedKey)return;
+  const v=parseFloat(document.getElementById('pnl-input').value);
+  if(isNaN(v)){toast('请输入有效数字 🥐');return;}
+  const btn=document.getElementById('btn-save-pnl');
+  btn.disabled=true; btn.textContent='保存中…'; sync('spin','保存中…');
+  try{
+    await dbUpsert('daily_pnl',{date_key:selectedKey,pnl:v});
+    DAILY_PNL[selectedKey]=v;
+    sync('ok','已同步'); showPeriod(selectedKey); renderChart(); toast('✅ 已保存');
+  }catch(e){ sync('err','保存失败'); toast('⚠️ 保存失败：'+e.message); }
+  btn.disabled=false; btn.textContent='保存 🍰';
+}
+
+async function deleteDayPnl() {
+  if(!selectedKey||!confirm('确定删除这天的收益？'))return;
+  sync('spin','删除中…');
+  try{
+    await dbDelete('daily_pnl',`date_key=eq.${selectedKey}`);
+    delete DAILY_PNL[selectedKey];
+    sync('ok','已同步');
+    document.getElementById('day-card').style.display='none';
+    selectedKey=null; renderCal(); renderChart(); toast('已删除');
+  }catch(e){ sync('err','删除失败'); toast('⚠️ 删除失败：'+e.message); }
+}
+
+function calPrev(){
+  if(calMode==='day'){ calMonth--;if(calMonth<1){calMonth=12;calYear--;} }
+  else if(calMode==='month'){ calYear--; }
+  else { calYear-=5; }
+  selectedKey=null; renderCal(); document.getElementById('day-card').style.display='none';
+}
+function calNext(){
+  if(calMode==='day'){ calMonth++;if(calMonth>12){calMonth=1;calYear++;} }
+  else if(calMode==='month'){ calYear++; }
+  else { calYear+=5; }
+  selectedKey=null; renderCal(); document.getElementById('day-card').style.display='none';
+}
+
+/* ══ CHART ══ */
+function renderChart() {
+  const ctx=document.getElementById('pnl-chart').getContext('2d');
+  if(chartInst) chartInst.destroy();
+  let labels=[], data=[], cumData=[];
+  const sorted=Object.keys(DAILY_PNL).sort();
+  if(!sorted.length) return;
+
+  if(calMode==='day'){
+    // Show days of current month
+    const prefix=`${calYear}-${pad2(calMonth)}`;
+    sorted.filter(k=>k.startsWith(prefix)).forEach(k=>{
+      labels.push(k.slice(8));
+      data.push(DAILY_PNL[k]);
+    });
+  } else if(calMode==='month'){
+    // Show monthly totals for current year
+    for(let m=1;m<=12;m++){
+      const pref=`${calYear}-${pad2(m)}`;
+      const total=Object.entries(DAILY_PNL).filter(([k])=>k.startsWith(pref)).reduce((s,[,v])=>s+v,0);
+      const hasData=Object.keys(DAILY_PNL).some(k=>k.startsWith(pref));
+      if(hasData){ labels.push(`${m}月`); data.push(total); }
+    }
+  } else {
+    // Show yearly totals
+    const years=[...new Set(sorted.map(k=>k.slice(0,4)))].sort();
+    years.forEach(y=>{
+      const total=Object.entries(DAILY_PNL).filter(([k])=>k.startsWith(y)).reduce((s,[,v])=>s+v,0);
+      labels.push(y+'年'); data.push(total);
+    });
+  }
+
+  // Cumulative
+  let cum=0;
+  data.forEach(v=>{ cum+=v; cumData.push(parseFloat(cum.toFixed(2))); });
+
+  chartInst=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {
+          label:'当期收益',
+          data,
+          backgroundColor: data.map(v=>v>=0?'rgba(125,200,160,0.7)':'rgba(220,120,120,0.7)'),
+          borderColor: data.map(v=>v>=0?'#2D8A5E':'#C04545'),
+          borderWidth:1.5, borderRadius:4, yAxisID:'y'
+        },
+        {
+          label:'累计收益',
+          data:cumData,
+          type:'line',
+          borderColor:'#E8899A',
+          backgroundColor:'rgba(249,198,208,0.15)',
+          borderWidth:2, pointRadius:3, tension:0.3, fill:true, yAxisID:'y'
+        }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{font:{family:'Nunito',size:11},color:'#7A5A65'}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}元`}}
+      },
+      scales:{
+        x:{ticks:{font:{family:'Nunito',size:10},color:'#7A5A65'},grid:{display:false}},
+        y:{ticks:{font:{family:'Nunito',size:10},color:'#7A5A65',callback:v=>v+'元'},grid:{color:'rgba(249,198,208,0.3)'}}
+      }
+    }
+  });
+}
+
+/* ══ TABS ══ */
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='calendar') setTimeout(renderChart,50);
+}
+
+/* ══ LOCAL FALLBACK ══ */
+function lsLoad(){
+  try{
+    const h=localStorage.getItem('bi_holdings');if(h)HOLDINGS=JSON.parse(h);
+    const d=localStorage.getItem('bi_daily_pnl');if(d)DAILY_PNL=JSON.parse(d);
+    const cp=localStorage.getItem('bi_cp');if(cp)document.getElementById('cur-price').value=cp;
+    const tp=localStorage.getItem('bi_tp');if(tp)document.getElementById('target-price').value=tp;
+  }catch(e){}
+}
+
+/* ══ INIT ══ */
+function initApp(){
+  const now=new Date();
+  document.getElementById('time-badge').textContent=
+    `${now.getFullYear()}/${pad2(now.getMonth()+1)}/${pad2(now.getDate())} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+  document.getElementById('f-date').value=
+    `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+  document.getElementById('sf-date').value=
+    `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+  loadAll();
+}
+
+if(sessionStorage.getItem('bi_ok')==='1'){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  initApp();
+}
+</script>
+</body>
+</html>
